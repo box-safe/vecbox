@@ -2,31 +2,40 @@
 
 ## Project Setup
 - [x] Configurar TypeScript
-- [x] Definir estrutura de diretórios (src/, ports/, adapters/, providers/)
+- [x] Definir estrutura de diretórios (src/, providers/, factory/, types/)
 - [x] Configurar tsconfig.json
-- [ ] Adicionar dependências necessárias (OpenAI, Google AI, etc)
+- [x] Adicionar dependências necessárias (OpenAI, Google AI, etc)
+- [x] Configurar logger utilitário
 
-## Core Architecture (Hexagonal)
-- [ ] Criar interface/port principal para embedding providers (TypeScript)
-- [ ] Definir tipos e interfaces compartilhadas
-- [ ] Implementar factory pattern para seleção de providers
+## Core Architecture (Factory + Strategy)
+- [x] Criar tipos e interfaces compartilhadas
+- [x] Criar interface base EmbeddingProvider
+- [x] Implementar factory pattern para seleção de providers
+- [ ] Criar interface principal de uso simplificado
 
-## Local Providers (Adapters)
-- [ ] Implementar adapter para @xenova/transformers
-- [ ] Suporte para diferentes modelos locais
-- [ ] Configuração de modelos e cache
+## Providers Implementation
+- [x] Implementar provider OpenAI
+- [x] Implementar provider Google Gemini
+- [x] Implementar provider Anthropic Claude
+- [x] Implementar provider Mistral
+- [x] Implementar provider DeepSeek
+- [x] Implementar provider local (@xenova/transformers)
 
-## Remote Providers (Adapters)
-- [ ] Implementar adapter para OpenAI
-- [ ] Implementar adapter para Google Gemini
-- [ ] Implementar adapter para outros providers (Cohere, Anthropic, etc)
+## Main Interface (API Simplificada)
+- [x] Criar função principal embed() com interface simples
+- [x] Suporte para diferentes tipos de entrada (texto, documento, arquivo)
+- [x] Sistema de configuração automática de providers
+- [x] Tratamento de erros amigável
+- [x] Sistema de fallback automático
 
 ## Examples & Tests
-- [ ] Criar exemplos de uso
+- [ ] Criar exemplos de uso básico
 - [ ] Implementar testes unitários
 - [ ] Documentação da API
+- [ ] Guia de início rápido
 
-## Configuration
+## Configuration & Utils
 - [ ] Sistema de configuração (environment variables, config files)
-- [ ] Sistema de logging
-- [ ] Tratamento de erros 
+- [ ] Sistema de logging integrado
+- [ ] Validação de inputs
+- [ ] Sistema de cache opcionala
