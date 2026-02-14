@@ -15,7 +15,7 @@ console.log(result.embedding); // [0.1, 0.2, ...]
 
 ## Installation
 ```bash
-npm install embed-kit
+
 ```
 
 ## Quick Start
