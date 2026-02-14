@@ -88,6 +88,12 @@ modules.d.ts
 # External dependencies
 llama.cpp/
 
+# Core heavy files
+core/models/
+*.gguf
+*.bin
+*.safetensors
+
 # Temporary files
 *.tmp
 *.temp
