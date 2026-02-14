@@ -74,11 +74,11 @@ export class GeminiProvider extends EmbeddingProvider {
 
   getDimensions(): number {
     const model = this.getModel();
-    if (model.includes('gemini-embedding-001')) return 768;
+    if (model.includes('gemini-embedding-001')) return 3072;
     if (model.includes('text-embedding-004')) return 768;
     if (model.includes('embedding-001')) return 768;
     if (model.includes('multimodalembedding')) return 768;
-    return 768; // default for Gemini embeddings
+    return 3072; // default for Gemini embeddings
   }
 
   getProviderName(): string {

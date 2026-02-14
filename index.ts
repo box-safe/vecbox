@@ -45,9 +45,7 @@ export const LIB_INFO = {
   supportedProviders: [
     'openai',
     'gemini', 
-    'claude',
     'mistral',
-    'deepseek',
     'llamacpp'
   ] as const
 } as const;

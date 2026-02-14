@@ -100,23 +100,6 @@ wget https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nom
 </details>
 
 <details>
-<summary><b>Anthropic Claude</b></summary>
-```typescript
-await embed(
-  {
-    provider: 'claude',
-    model: 'claude-3-sonnet-20240229',
-    apiKey: process.env.ANTHROPIC_API_KEY
-  },
-  { text: 'Your text' }
-);
-```
-
-**Setup:** Get API key at [console.anthropic.com](https://console.anthropic.com)
-
-</details>
-
-<details>
 <summary><b>Mistral</b></summary>
 ```typescript
 await embed(
@@ -130,12 +113,6 @@ await embed(
 ```
 
 **Setup:** Get API key at [mistral.ai](https://mistral.ai)
-
-</details>
-
-<details>
-
-**Setup:** Get API key at [platform.deepseek.com](https://platform.deepseek.com)
 
 </details>
 
@@ -234,8 +211,7 @@ Auto-detects best provider in priority order:
 1. **Llama.cpp** (Local & Free)
 2. **OpenAI** (if API key available)
 3. **Gemini** (if API key available)
-4. **Claude** (if API key available)
-5. **Mistral** (if API key available)
+4. **Mistral** (if API key available)
 
 ```typescript
 await autoEmbed({ text: string } | { filePath: string })
@@ -272,7 +248,7 @@ Returns available providers.
 import { getSupportedProviders } from 'embedbox';
 
 const providers = getSupportedProviders();
-// → ['openai', 'gemini', 'claude', 'mistral', 'deepseek', 'llamacpp']
+// → ['openai', 'gemini', 'mistral', 'llamacpp']
 ```
 
 ### `createProvider(config)`

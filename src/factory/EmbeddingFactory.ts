@@ -4,7 +4,6 @@ import { OpenAIProvider } from '@providers/openai';
 import { GeminiProvider } from '@providers/gemini';
 import { ClaudeProvider } from '@providers/claude';
 import { MistralProvider } from '@providers/mistral';
-import { DeepSeekProvider } from '@providers/deepseek';
 import { LlamaCppProvider } from '@providers/llamacpp';
 import { Logger } from '@src/util/logger';
 

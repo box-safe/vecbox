@@ -1,7 +1,6 @@
 export type ProviderType = 
   | 'openai'
   | 'gemini' 
-  | 'claude'
   | 'mistral'
   | 'llamacpp';
 

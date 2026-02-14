@@ -29,9 +29,7 @@
     "machine-learning",
     "openai",
     "gemini",
-    "claude",
     "mistral",
-    "deepseek",
     "llamacpp",
     "semantic-search",
     "similarity",
@@ -69,7 +67,6 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.74.0",
     "@google/generative-ai": "^0.24.1",
     "@mistralai/mistralai": "^1.14.0",
     "dotenv": "^17.3.1",
