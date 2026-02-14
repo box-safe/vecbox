@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
-import { EmbeddingProvider } from '@providers/base/EmbeddingProvider.js';
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
-import { Logger } from '@src/util/logger.js';
+import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
+import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
+import { Logger } from '@src/util/logger';
 
 const logger = Logger.createModuleLogger('openai');
 
@@ -49,8 +49,8 @@ export class OpenAIProvider extends EmbeddingProvider {
           totalTokens: response.usage.total_tokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`OpenAI embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`OpenAI embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -77,8 +77,8 @@ export class OpenAIProvider extends EmbeddingProvider {
           totalTokens: response.usage.total_tokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`OpenAI batch embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`OpenAI batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -100,8 +100,8 @@ export class OpenAIProvider extends EmbeddingProvider {
     try {
       await this.client.models.list();
       return true;
-    } catch (error: any) {
-      logger.error(`OpenAI readiness check failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`OpenAI readiness check failed: ${(error instanceof Error ? error.message : String(error))}`);
       return false;
     }
   }

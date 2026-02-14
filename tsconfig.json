@@ -1,5 +1,19 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "examples/**/*",
+    "index.ts",
+    "main.ts",
+    "vitest.config.ts",
+    "tsup.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "llama.cpp"
+  ],
   "compilerOptions": {
     // File Layout
     // "rootDir": "./src",
@@ -7,14 +21,17 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "commonjs",
     "target": "esnext",
     "types": ["node"],
+    "noEmit": true,
     "paths": {
       "@/*": ["./*"],
       "@src/*": ["./src/*"],
       "@providers/*": ["./src/providers/*"],
-      "factory/*": ["./src/factory/*"]
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/util/*"],
+      "@factory/*": ["./src/factory/*"]
     },
     // For nodejs:
     // "lib": ["esnext"],
@@ -41,7 +58,6 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",

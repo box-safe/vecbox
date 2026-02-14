@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { EmbeddingProvider } from '@providers/base/EmbeddingProvider.js';
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
-import { Logger } from '@src/util/logger.js';
+import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
+import type { EmbedConfig, EmbedResult, BatchEmbedResult } from '@src/types/index';
+import { Logger } from '@src/util/logger';
 
 const logger = Logger.createModuleLogger('claude');
 
@@ -24,28 +24,29 @@ export class ClaudeProvider extends EmbeddingProvider {
     logger.info('Claude provider initialized');
   }
 
-  async embed(input: EmbedInput): Promise<EmbedResult> {
+  async embed(): Promise<EmbedResult> {
     try {
-      const text = await this.readInput(input);
       logger.debug(`Embedding text with model: ${this.getModel()}`);
 
       // Note: Claude doesn't have native embeddings API yet
       // This is a placeholder implementation
       throw new Error('Claude embeddings API not yet available. Please use another provider.');
       
-    } catch (error: any) {
-      logger.error(`Claude embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Unknown error';
+      logger.error(`Claude embedding failed: ${errorMessage}`);
       throw error;
     }
   }
 
-  async embedBatch(inputs: EmbedInput[]): Promise<BatchEmbedResult> {
+  async embedBatch(): Promise<BatchEmbedResult> {
     try {
       // Note: Claude doesn't have native embeddings API yet
       throw new Error('Claude embeddings API not yet available. Please use another provider.');
       
-    } catch (error: any) {
-      logger.error(`Claude batch embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Unknown error';
+      logger.error(`Claude batch embedding failed: ${errorMessage}`);
       throw error;
     }
   }
@@ -68,8 +69,9 @@ export class ClaudeProvider extends EmbeddingProvider {
         messages: [{ role: 'user', content: 'test' }]
       });
       return true;
-    } catch (error: any) {
-      logger.error(`Claude readiness check failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Unknown error';
+      logger.error(`Claude readiness check failed: ${errorMessage}`);
       return false;
     }
   }

@@ -1,4 +1,4 @@
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
+import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
 
 export abstract class EmbeddingProvider {
   protected config: EmbedConfig;

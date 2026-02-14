@@ -1,21 +1,71 @@
 {
   "name": "embed-kit",
   "version": "1.0.0",
-  "description": "",
+  "description": "A minimal and powerful embedding library that supports multiple providers with automatic detection and fallback capabilities",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup",
+    "dev": "tsx watch main.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "example": "tsx examples/basic-usage.ts",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "embeddings",
+    "vector",
+    "ai",
+    "machine-learning",
+    "openai",
+    "gemini",
+    "claude",
+    "mistral",
+    "deepseek",
+    "llamacpp",
+    "semantic-search",
+    "similarity",
+    "nlp",
+    "typescript"
+  ],
+  "author": {
+    "name": "Embed Kit Team",
+    "email": "support@embed-kit.dev",
+    "url": "https://embed-kit.dev"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/embed-kit/embed-kit.git"
+  },
+  "homepage": "https://embed-kit.dev",
+  "bugs": {
+    "url": "https://github.com/embed-kit/embed-kit/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.2.3",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0",
+    "jiti": "^2.6.1",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.55.0",
+    "vitest": "^4.0.18"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
@@ -23,7 +73,6 @@
     "@mistralai/mistralai": "^1.14.0",
     "deepseek": "^0.0.2",
     "dotenv": "^17.3.1",
-    "eslint": "^10.0.0",
     "openai": "^6.21.0"
   }
 }

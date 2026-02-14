@@ -1,7 +1,7 @@
 import { Mistral } from '@mistralai/mistralai';
-import { EmbeddingProvider } from '@providers/base/EmbeddingProvider.js';
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
-import { Logger } from '@src/util/logger.js';
+import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
+import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
+import { Logger } from '@src/util/logger';
 
 const logger = Logger.createModuleLogger('mistral');
 
@@ -49,8 +49,8 @@ export class MistralProvider extends EmbeddingProvider {
           totalTokens: response.usage.totalTokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`Mistral embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Mistral embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -65,9 +65,9 @@ export class MistralProvider extends EmbeddingProvider {
         inputs: texts,
       });
 
-      const embeddings = response.data.map((item: any) => {
-        if (!item) throw new Error('No embedding returned from Mistral API');
-        return item.embedding;
+      const embeddings = response.data.map((item) => {
+        if (!item.embedding) throw new Error('No embedding returned from Mistral API');
+        return item.embedding as number[];
       });
 
       return {
@@ -80,8 +80,8 @@ export class MistralProvider extends EmbeddingProvider {
           totalTokens: response.usage.totalTokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`Mistral batch embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Mistral batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -105,8 +105,8 @@ export class MistralProvider extends EmbeddingProvider {
         inputs: ['test'],
       });
       return response.data.length > 0;
-    } catch (error: any) {
-      logger.error(`Mistral readiness check failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Mistral readiness check failed: ${(error instanceof Error ? error.message : String(error))}`);
       return false;
     }
   }

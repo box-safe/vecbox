@@ -1,7 +1,7 @@
 import { DeepSeek } from 'deepseek';
-import { EmbeddingProvider } from '@providers/base/EmbeddingProvider.js';
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
-import { Logger } from '@src/util/logger.js';
+import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
+import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
+import { Logger } from '@src/util/logger';
 
 const logger = Logger.createModuleLogger('deepseek');
 
@@ -15,7 +15,7 @@ export class DeepSeekProvider extends EmbeddingProvider {
       throw new Error('DeepSeek API key is required');
     }
 
-    const clientOptions: any = {
+    const clientOptions: { apiKey: string; timeout: number; baseURL?: string } = {
       apiKey: config.apiKey,
       timeout: config.timeout || 30000,
     };
@@ -54,8 +54,8 @@ export class DeepSeekProvider extends EmbeddingProvider {
           totalTokens: response.usage.total_tokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`DeepSeek embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`DeepSeek embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -70,7 +70,7 @@ export class DeepSeekProvider extends EmbeddingProvider {
         input: texts,
       });
 
-      const embeddings = response.data.map((item: any) => item.embedding);
+      const embeddings = response.data.map((item: { embedding: number[] }) => item.embedding);
 
       return {
         embeddings,
@@ -82,8 +82,8 @@ export class DeepSeekProvider extends EmbeddingProvider {
           totalTokens: response.usage.total_tokens,
         } : undefined,
       };
-    } catch (error: any) {
-      logger.error(`DeepSeek batch embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`DeepSeek batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -107,8 +107,8 @@ export class DeepSeekProvider extends EmbeddingProvider {
         input: 'test',
       });
       return true;
-    } catch (error: any) {
-      logger.error(`DeepSeek readiness check failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`DeepSeek readiness check failed: ${(error instanceof Error ? error.message : String(error))}`);
       return false;
     }
   }

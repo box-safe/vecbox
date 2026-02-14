@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { EmbeddingProvider } from '@providers/base/EmbeddingProvider.js';
-import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index.js';
-import { Logger } from '@src/util/logger.js';
+import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
+import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
+import { Logger } from '@src/util/logger';
 
 const logger = Logger.createModuleLogger('gemini');
 
@@ -39,8 +39,8 @@ export class GeminiProvider extends EmbeddingProvider {
         model: this.getModel(),
         provider: 'gemini',
       };
-    } catch (error: any) {
-      logger.error(`Gemini embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Gemini embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
@@ -58,7 +58,7 @@ export class GeminiProvider extends EmbeddingProvider {
         texts.map(text => model.embedContent(text))
       );
 
-      const embeddings = results.map((result: any) => result.embedding.values);
+      const embeddings = results.map((result: { embedding: { values: number[] } }) => result.embedding.values);
 
       return {
         embeddings,
@@ -66,14 +66,16 @@ export class GeminiProvider extends EmbeddingProvider {
         model: this.getModel(),
         provider: 'gemini',
       };
-    } catch (error: any) {
-      logger.error(`Gemini batch embedding failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Gemini batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
     }
   }
 
   getDimensions(): number {
     const model = this.getModel();
+    if (model.includes('gemini-embedding-001')) return 768;
+    if (model.includes('text-embedding-004')) return 768;
     if (model.includes('embedding-001')) return 768;
     if (model.includes('multimodalembedding')) return 768;
     return 768; // default for Gemini embeddings
@@ -81,6 +83,10 @@ export class GeminiProvider extends EmbeddingProvider {
 
   getProviderName(): string {
     return 'Google Gemini';
+  }
+
+  protected getModel(): string {
+    return this.config.model || 'gemini-embedding-001';
   }
 
   async isReady(): Promise<boolean> {
@@ -91,8 +97,8 @@ export class GeminiProvider extends EmbeddingProvider {
       // Test with a simple embedding
       await model.embedContent('test');
       return true;
-    } catch (error: any) {
-      logger.error(`Gemini readiness check failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Gemini readiness check failed: ${(error instanceof Error ? error.message : String(error))}`);
       return false;
     }
   }

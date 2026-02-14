@@ -143,4 +143,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 .env
+###############
+# Local files #
+###############
 node_modules
+llama.cpp
+tests
+l.md
