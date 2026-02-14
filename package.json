@@ -1,12 +1,13 @@
 {
-  "name": "embed-kit",
-  "version": "1.0.0",
+  "name": "vecbox",
+  "version": "0.1.0",
   "description": "A minimal and powerful embedding library that supports multiple providers with automatic detection and fallback capabilities",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
+    "src",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -38,18 +39,18 @@
     "typescript"
   ],
   "author": {
-    "name": "Embed Kit Team",
-    "email": "support@embed-kit.dev",
-    "url": "https://embed-kit.dev"
+    "name": "Embedbox Team",
+    "email": "boxsafe.org@gmail.com",
+    "url": "https://boxsafe.org"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/embed-kit/embed-kit.git"
+    "url": "https://github.com/embedbox/embedbox.git"
   },
-  "homepage": "https://embed-kit.dev",
+  "homepage": "https://embedbox.dev",
   "bugs": {
-    "url": "https://github.com/embed-kit/embed-kit/issues"
+    "url": "https://github.com/embedbox/embedbox/issues"
   },
   "engines": {
     "node": ">=16.0.0"

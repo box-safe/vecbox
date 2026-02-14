@@ -1,10 +1,10 @@
-# embed-Kit v1.0.0
+# vecbox v0.1.0
 
-![Embed Kit](./src/images/embed-kit.png)
-[![npm version](https://img.shields.io/npm/v/embed-kit.svg)](https://www.npmjs.com/package/embed-kit)
+![vecbox](./src/images/vecbox.png)
+[![npm version](https://img.shields.io/npm/v/vecbox.svg)](https://www.npmjs.com/package/vecbox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Why Embed Kit?
+## Why Embedbox?
 
 **One API, multiple providers.** Switch between OpenAI, Gemini, or run locally with Llama.cpp without changing code.
 ```typescript
@@ -22,7 +22,7 @@ console.log(result.embedding); // [0.1, 0.2, ...]
 
 ### Auto-detect (Recommended)
 ```typescript
-import { autoEmbed } from 'embed-kit';
+import { autoEmbed } from 'vecbox';
 
 const result = await autoEmbed({ text: 'Your text' });
 // Automatically uses: Llama.cpp (local) → OpenAI → Gemini → ...
@@ -30,7 +30,7 @@ const result = await autoEmbed({ text: 'Your text' });
 
 ### Specific Provider
 ```typescript
-import { embed } from 'embed-kit';
+import { embed } from 'vecbox';
 
 const result = await embed(
   { provider: 'openai', apiKey: process.env.OPENAI_API_KEY },
@@ -280,7 +280,7 @@ await embed(
 
 Returns available providers.
 ```typescript
-import { getSupportedProviders } from 'embed-kit';
+import { getSupportedProviders } from 'embedbox';
 
 const providers = getSupportedProviders();
 // → ['openai', 'gemini', 'claude', 'mistral', 'deepseek', 'llamacpp']
@@ -290,7 +290,7 @@ const providers = getSupportedProviders();
 
 Create provider instance for advanced usage.
 ```typescript
-import { createProvider } from 'embed-kit';
+import { createProvider } from 'embedbox';
 
 const provider = createProvider({
   provider: 'openai',
@@ -317,7 +317,7 @@ DEEPSEEK_API_KEY=...
 ## Error Handling
 
 ```typescript
-import { autoEmbed } from 'embed-kit';
+import { autoEmbed } from 'embedbox';
 
 try {
   const result = await autoEmbed({ text: 'Hello' });
@@ -347,7 +347,7 @@ import {
   type EmbedConfig,
   type EmbedInput,
   type EmbedResult 
-} from 'embed-kit';
+} from 'embedbox';
 
 // Full type safety
 const config: EmbedConfig = {
@@ -364,14 +364,14 @@ const result: EmbedResult = await embed(config, input);
 
 ## License
 
-MIT © Embed Kit Team
+MIT © Embedbox Team
 
 ## Links
 
-- [npm](https://www.npmjs.com/package/embed-kit)
-- [GitHub](https://github.com/box-safe/embed-kit)
-- [Documentation](https://embed-kit.dev)
+- [npm](https://www.npmjs.com/package/embedbox)
+- [GitHub](https://github.com/embedbox/embedbox)
+- [Documentation](https://embedbox.dev)
 
 ---
 
-**Embed Kit v1.0.0** - One API, multiple providers. Simple embeddings.
+**Embedbox v1.0.0** - One API, multiple providers. Simple embeddings.

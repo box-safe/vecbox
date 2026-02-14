@@ -1,5 +1,5 @@
 /**
- * Embed Kit v1.0.0 - Main Entry Point
+ * Embedbox v1.0.0 - Main Entry Point
  * 
  * A minimal and powerful embedding library that supports multiple providers
  * with automatic detection and fallback capabilities.
@@ -37,11 +37,11 @@ export function getVersion(): string {
  * Library information
  */
 export const LIB_INFO = {
-  name: 'embed-kit',
+  name: 'embedbox',
   version: VERSION,
   description: 'A minimal and powerful embedding library',
-  homepage: 'https://embed-kit.dev',
-  repository: 'https://github.com/embed-kit/embed-kit.git',
+  homepage: 'https://embedbox.dev',
+  repository: 'https://github.com/embedbox/embedbox.git',
   supportedProviders: [
     'openai',
     'gemini', 

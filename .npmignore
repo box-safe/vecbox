@@ -1,0 +1,86 @@
+# Development files (keep src/ for TypeScript users)
+examples/
+tests/
+docs/
+TODO.md
+PUBLISH.md
+l.md
+modules.d.ts
+
+# Config files
+.eslintrc.js
+eslint.config.cjs
+vitest.config.ts
+tsup.config.ts
+pnpm-workspace.yaml
+pnpm-lock.yaml
+
+# Build and cache
+.cache
+.parcel-cache
+.eslintcache
+.stylelintcache
+.npm
+.pnpm-store
+coverage
+*.lcov
+.nyc_output
+
+# Dependencies
+node_modules/
+jspm_packages/
+web_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Lock files
+*.tgz
+*.lock-wscript
+.yarn-integrity
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# IDE files
+.vscode/
+.vscode-test
+.tern-port
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+.node_repl_history
+.grunt
+lib-cov
+bower_components
+
+# External dependencies
+llama.cpp/
+
+# Documentation files (keep CMD.md for reference)
+CMD.md
+
+.npmrc

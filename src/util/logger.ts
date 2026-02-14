@@ -33,14 +33,14 @@ export class Logger {
         [LogLevel.ERROR]: 'ERROR',
     };
 
-    constructor(moduleName: string = 'embed-kit', level: LogLevel = LogLevel.INFO) {
+    constructor(moduleName: string = 'embedbox', level: LogLevel = LogLevel.INFO) {
         this.moduleName = moduleName;
         this.currentLevel = level;
     }
 
     static getInstance(moduleName?: string, level?: LogLevel): Logger {
         if (!Logger.instance) {
-            Logger.instance = new Logger(moduleName || 'embed-kit', level);
+            Logger.instance = new Logger(moduleName || 'embedbox', level);
         }
         return Logger.instance;
     }
@@ -88,28 +88,28 @@ export class Logger {
 
     // Static methods for quick access
     static debug(message: string, moduleName?: string): void {
-        const logger = new Logger(moduleName || 'embed-kit');
+        const logger = new Logger(moduleName || 'embedbox');
         logger.debug(message);
     }
 
     static info(message: string, moduleName?: string): void {
-        const logger = new Logger(moduleName || 'embed-kit');
+        const logger = new Logger(moduleName || 'embedbox');
         logger.info(message);
     }
 
     static warn(message: string, moduleName?: string): void {
-        const logger = new Logger(moduleName || 'embed-kit');
+        const logger = new Logger(moduleName || 'embedbox');
         logger.warn(message);
     }
 
     static error(message: string, moduleName?: string): void {
-        const logger = new Logger(moduleName || 'embed-kit');
+        const logger = new Logger(moduleName || 'embedbox');
         logger.error(message);
     }
 
     // Method to create a logger instance for a specific module
     static createModuleLogger(moduleName: string, level?: LogLevel): Logger {
-        return new Logger(`embed-kit:${moduleName}`, level);
+        return new Logger(`embedbox:${moduleName}`, level);
     }
 }
 

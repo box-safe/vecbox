@@ -1,4 +1,4 @@
-# Embed Kit - TODO
+# vecbox - TODO
  
 ## 🎯 **Objetivo Principal: Implementar embeddings locais com llama.cpp**
  
