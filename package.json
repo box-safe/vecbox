@@ -8,19 +8,24 @@
   "files": [
     "dist",
     "src",
+    "native",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
+    "build:native": "node scripts/build-native.cjs",
+    "build:all": "npm run build && npm run build:native",
     "dev": "tsx watch main.ts",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:native": "vitest test/native.test.js",
+    "test:integration": "vitest test/integration.test.js",
     "example": "tsx examples/basic-usage.ts",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build:all"
   },
   "keywords": [
     "embeddings",

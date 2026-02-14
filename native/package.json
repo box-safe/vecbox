@@ -1,0 +1,26 @@
+{
+  "name": "llama-embedding-native",
+  "version": "1.0.0",
+  "description": "Native Node.js bindings for Llama.cpp embeddings",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "build": "node-gyp rebuild"
+  },
+  "dependencies": {
+    "node-addon-api": "^7.1.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.1.0"
+  },
+  "gypfile": true,
+  "keywords": [
+    "llama.cpp",
+    "embedding",
+    "native",
+    "n-api",
+    "node.js"
+  ],
+  "author": "Vecbox Team",
+  "license": "MIT"
+}

@@ -1,5 +1,6 @@
 # Llama.cpp Core
-
+code taken from [llama.cpp](https://github.com/ggml-org/llama.cpp)
+---
 Estrutura funcional do código do llama.cpp para embeddings.
 
 ## 📁 Estrutura

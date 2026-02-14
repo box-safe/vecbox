@@ -1,6 +1,6 @@
 /**
  * Llama.cpp Provider - Local embeddings using llama.cpp directly
- * Uses llama-embedding binary without any external dependencies
+ * Uses native N-API module for better performance
  */
 
 import { access, constants } from 'fs/promises';
@@ -10,6 +10,15 @@ import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@sr
 import { logger } from '@src/util/logger';
 import * as http from 'http';
 
+// Try to import native module
+let nativeModule: any = null;
+try {
+  nativeModule = require('../../native');
+  logger.info('Using native Llama.cpp module');
+} catch (error) {
+  logger.warn('Native module not available, falling back to HTTP');
+}
+
 // Extend EmbedConfig to include llamaPath
 interface LlamaCppConfig extends EmbedConfig {
   llamaPath?: string;
@@ -18,12 +27,26 @@ interface LlamaCppConfig extends EmbedConfig {
 export class LlamaCppProvider extends EmbeddingProvider {
   private llamaPath: string;
   private modelPath: string;
+  private useNative: boolean;
+  private nativeModel: any = null;
 
   constructor(config: LlamaCppConfig) {
     super({ ...config, provider: 'llamacpp' });
     this.modelPath = config.model || 'nomic-embed-text-v1.5.Q4_K_M.gguf';
     this.llamaPath = config.llamaPath || './llama.cpp/build/bin/llama-embedding';
-    logger.info(`Llama.cpp provider initialized with model: ${this.modelPath}`);
+    this.useNative = !!nativeModule;
+    
+    if (this.useNative) {
+      try {
+        this.nativeModel = nativeModule.create(this.modelPath);
+        logger.info(`Llama.cpp provider initialized with native module: ${this.modelPath}`);
+      } catch (error) {
+        logger.error(`Failed to initialize native module: ${error}`);
+        this.useNative = false;
+      }
+    } else {
+      logger.info(`Llama.cpp provider initialized with HTTP fallback: ${this.modelPath}`);
+    }
   }
 
   // Public API methods
@@ -44,7 +67,12 @@ export class LlamaCppProvider extends EmbeddingProvider {
 
   async isReady(): Promise<boolean> {
     try {
-      // Check if llama-embedding exists and is executable
+      if (this.useNative && this.nativeModel) {
+        // Native module is ready if model was loaded successfully
+        return true;
+      }
+      
+      // Fallback to HTTP check
       await access(this.llamaPath, constants.F_OK);
       await access(this.llamaPath, constants.X_OK);
       
@@ -69,7 +97,19 @@ export class LlamaCppProvider extends EmbeddingProvider {
         throw new Error('Text input cannot be empty');
       }
 
-      // Use HTTP API instead of CLI arguments
+      if (this.useNative && this.nativeModel) {
+        // Use native module
+        const embedding = this.nativeModel.embed(text);
+        
+        return {
+          embedding,
+          dimensions: embedding.length,
+          model: this.getModel(),
+          provider: 'llamacpp',
+        };
+      }
+
+      // Fallback to HTTP
       const requestBody = {
         input: text,
         model: await this.getModelPath(),
@@ -99,6 +139,31 @@ export class LlamaCppProvider extends EmbeddingProvider {
     try {
       logger.debug(`Batch embedding ${inputs.length} texts with llama.cpp`);
       
+      if (this.useNative && this.nativeModel) {
+        // Use native module for batch
+        const embeddings: number[][] = [];
+        
+        for (const input of inputs) {
+          const text = await this.readInput(input);
+          if (text.trim()) {
+            const embedding = this.nativeModel.embed(text);
+            embeddings.push(embedding);
+          }
+        }
+        
+        if (embeddings.length === 0) {
+          throw new Error('No valid texts to embed');
+        }
+        
+        return {
+          embeddings,
+          dimensions: embeddings[0]?.length || 0,
+          model: this.getModel(),
+          provider: 'llamacpp',
+        };
+      }
+
+      // Fallback to HTTP batch processing
       const texts = [];
       for (const input of inputs) {
         const text = await this.readInput(input);
@@ -137,6 +202,19 @@ export class LlamaCppProvider extends EmbeddingProvider {
     } catch (error: unknown) {
       logger.error(`Llama.cpp batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
+    }
+  }
+
+  // Cleanup method
+  async cleanup(): Promise<void> {
+    if (this.useNative && this.nativeModel) {
+      try {
+        this.nativeModel.close();
+        this.nativeModel = null;
+        logger.info('Native Llama.cpp model closed');
+      } catch (error) {
+        logger.error(`Error closing native model: ${error}`);
+      }
     }
   }
 
@@ -268,8 +346,8 @@ export class LlamaCppProvider extends EmbeddingProvider {
       throw new Error(`Unexpected format: ${JSON.stringify(Object.keys(response))}`);
       
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Unknown error';
-      throw new Error(`Parse failed: ${errorMessage}`, { cause: error });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Parse failed: ${errorMessage}`);
     }
   }
 
