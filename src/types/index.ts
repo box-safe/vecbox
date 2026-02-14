@@ -3,7 +3,6 @@ export type ProviderType =
   | 'gemini' 
   | 'claude'
   | 'mistral'
-  | 'deepseek'
   | 'llamacpp';
 
 export interface EmbedConfig {

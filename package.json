@@ -1,6 +1,6 @@
 {
   "name": "vecbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A minimal and powerful embedding library that supports multiple providers with automatic detection and fallback capabilities",
   "type": "module",
   "main": "dist/index.js",
@@ -72,7 +72,6 @@
     "@anthropic-ai/sdk": "^0.74.0",
     "@google/generative-ai": "^0.24.1",
     "@mistralai/mistralai": "^1.14.0",
-    "deepseek": "^0.0.2",
     "dotenv": "^17.3.1",
     "openai": "^6.21.0"
   }

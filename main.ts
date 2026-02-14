@@ -63,8 +63,8 @@ export async function autoEmbed(
     { provider: 'llamacpp' as const, model: 'nomic-embed-text-v1.5.Q4_K_M.gguf' }, // Local & free (llama.cpp)
     { provider: 'openai' as const, model: 'text-embedding-3-small', apiKey: process.env.OPENAI_API_KEY || undefined },
     { provider: 'gemini' as const, model: 'gemini-embedding-001', apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || undefined },
+    { provider: 'deepseek' as const, model: 'deepseek-embedding-v2', apiKey: process.env.DEEPSEEK_API_KEY || undefined },
     { provider: 'mistral' as const, model: 'mistral-embed', apiKey: process.env.MISTRAL_API_KEY || undefined },
-    { provider: 'deepseek' as const, model: 'deepseek-chat', apiKey: process.env.DEEPSEEK_API_KEY || undefined },
   ];
   
   for (const config of providers) {

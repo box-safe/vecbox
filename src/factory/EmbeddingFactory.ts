@@ -16,7 +16,6 @@ export class EmbeddingFactory {
     ['gemini', GeminiProvider],
     ['claude', ClaudeProvider],
     ['mistral', MistralProvider],
-    ['deepseek', DeepSeekProvider],
     ['llamacpp', LlamaCppProvider], // Local embeddings with llama.cpp
   ]);
 

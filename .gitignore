@@ -51,7 +51,6 @@ build/
 # Environment files
 .env
 .env.*
-!.env.example
 
 # Lock files
 *.tgz
@@ -82,7 +81,6 @@ pnpm-lock.yaml
 examples/
 tests/
 docs/
-TODO.md
 PUBLISH.md
 l.md
 modules.d.ts

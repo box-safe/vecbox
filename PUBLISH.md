@@ -1,4 +1,4 @@
-# Publishing Guide - embedify v1.0.0
+# Publishing Guide - embedify v0.1.0
 
 This guide provides step-by-step instructions for publishing Embed Kit to npm and yarn.
 

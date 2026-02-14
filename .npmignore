@@ -84,3 +84,7 @@ llama.cpp/
 CMD.md
 
 .npmrc
+
+#develloper dir 
+src/
+

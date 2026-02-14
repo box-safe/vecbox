@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/vecbox.svg)](https://www.npmjs.com/package/vecbox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Why Embedbox?
+## Why vecbox?
 
 **One API, multiple providers.** Switch between OpenAI, Gemini, or run locally with Llama.cpp without changing code.
 ```typescript
@@ -15,7 +15,8 @@ console.log(result.embedding); // [0.1, 0.2, ...]
 
 ## Installation
 ```bash
-
+  npm install vacbox
+  pnpm add vacbox
 ```
 
 ## Quick Start
@@ -133,17 +134,6 @@ await embed(
 </details>
 
 <details>
-<summary><b>DeepSeek</b></summary>
-```typescript
-await embed(
-  {
-    provider: 'deepseek',
-    model: 'deepseek-chat',
-    apiKey: process.env.DEEPSEEK_API_KEY
-  },
-  { text: 'Your text' }
-);
-```
 
 **Setup:** Get API key at [platform.deepseek.com](https://platform.deepseek.com)
 
@@ -246,7 +236,6 @@ Auto-detects best provider in priority order:
 3. **Gemini** (if API key available)
 4. **Claude** (if API key available)
 5. **Mistral** (if API key available)
-6. **DeepSeek** (if API key available)
 
 ```typescript
 await autoEmbed({ text: string } | { filePath: string })
@@ -311,7 +300,6 @@ OPENAI_API_KEY=sk-...
 GOOGLE_GENERATIVE_AI_API_KEY=...
 ANTHROPIC_API_KEY=sk-ant-...
 MISTRAL_API_KEY=...
-DEEPSEEK_API_KEY=...
 ```
 
 ## Error Handling

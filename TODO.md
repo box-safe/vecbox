@@ -1,148 +1,137 @@
-# vecbox - TODO
- 
-## 🎯 **Objetivo Principal: Implementar embeddings locais com llama.cpp**
- 
+# TODO - Consertar DeepSeek com SDK OpenAI
+
+## 🎯 **Objetivo: Usar SDK da OpenAI para chamar API do DeepSeek**
+
 ### **Contexto:**
-- ✅ **Sharp removido** - Dependência problemática eliminada
-- ✅ **ONNX Runtime removido** - Não ideal para embeddings de linguagem
-- ✅ **llama.cpp compilado** - Modelo nomic-embed-text-v1.5.Q4_K_M.gguf baixado
-- 🎯 **Meta:** Usar API nativa do llama.cpp sem dependências externas
- 
+- ❌ **DeepSeek não tem SDK oficial no npm**
+- ✅ **API do DeepSeek é idêntica à da OpenAI**
+- 🎯 **Solução:** Reutilizar SDK da OpenAI mudando apenas baseURL
+
 ---
- 
-## 📋 **Tasks Divididas - Implementação llama.cpp**
- 
-### **Task 1: Análise da API llama.cpp**
-- [ ] **Estudar estrutura do embedding.cpp**
-  - [ ] Entender parâmetros de linha de comando
-  - [ ] Identificar formato de saída (JSON, array, raw)
-  - [ ] Mapear opções de pooling e normalização
-- [ ] **Analisar exemplos de uso**
-  - [ ] Comando básico: `./llama-embedding -m model.gguf -p "texto"`
-  - [ ] Batch processing: `--embd-separator` e `--embd-output-format`
-  - [ ] Opções de GPU: `--n-gpu-layers`
- 
-### **Task 2: Arquitetura do Provider llama.cpp**
-- [ ] **Criar LlamaCppProvider**
-  - [ ] Herdar de EmbeddingProvider
-  - [ ] Implementar detecção do llama.cpp na raiz do usuário
-  - [ ] Configurar caminho do modelo GGUF
-- [ ] **Implementar interface de comando**
-  - [ ] Usar `child_process.spawn` para chamar llama-embedding
-  - [ ] Capturar stdout/stderr para processamento
-  - [ ] Parsear saída JSON/array para embedding
- 
-### **Task 3: Detecção e Configuração**
-- [ ] **Implementar detecção automática**
-  - [ ] Buscar `./llama-embedding` ou `./build/bin/llama-embedding`
-  - [ ] Verificar permissões de execução
-  - [ ] Validar existência do modelo GGUF
-- [ ] **Configuração de caminhos**
-  - [ ] Suporte a caminhos relativos e absolutos
-  - [ ] Fallback para `~/llama.cpp/llama-embedding`
-  - [ ] Configuração via environment variables
- 
-### **Task 4: Processamento de Embeddings**
-- [ ] **Processamento individual**
-  - [ ] Executar comando com texto único
-  - [ ] Parsear saída para array de números
-  - [ ] Aplicar normalização se necessário
-- [ ] **Processamento em batch**
-  - [ ] Usar `--embd-separator` para múltiplos textos
-  - [ ] Processar saída JSON para arrays
-  - [ ] Otimizar performance para batches
- 
-### **Task 5: Integração com Factory**
-- [ ] **Registrar LlamaCppProvider**
-  - [ ] Adicionar ao EmbeddingFactory
-  - [ ] Incluir no tipo ProviderType
-  - [ ] Configurar como primeira opção no autoEmbed
+
+## 📋 **Tasks Divididas - Implementação DeepSeek**
+
+### **Task 1: Adicionar Dependência OpenAI**
+- [ ] **Instalar SDK da OpenAI**
+  - [ ] `npm install openai`
+  - [ ] Verificar versão compatível
+  - [ ] Atualizar package.json
+
+### **Task 2: Analisar Implementação Atual**
+- [ ] **Estudar DeepSeekProvider existente**
+  - [ ] Ler `src/providers/deepseek.ts`
+  - [ ] Entender estrutura atual
+  - [ ] Identificar pontos de mudança
+- [ ] **Verificar tipos e interfaces**
+  - [ ] Analisar `src/types/deepseek.d.ts`
+  - [ ] Entender interface EmbeddingProvider
+  - [ ] Mapear métodos necessários
+
+### **Task 3: Implementar Novo DeepSeekProvider**
+- [ ] **Criar implementação com SDK OpenAI**
+  - [ ] Importar OpenAI SDK
+  - [ ] Configurar baseURL para DeepSeek
+  - [ ] Implementar método embed()
+- [ ] **Manter compatibilidade**
+  - [ ] Mesma interface do provider atual
+  - [ ] Mesmos parâmetros de configuração
+  - [ ] Mesmo formato de saída
+
+### **Task 4: Configuração e Ambiente**
+- [ ] **Variáveis de ambiente**
+  - [ ] `DEEPSEEK_API_KEY`
+  - [ ] Validação de chave obrigatória
+  - [ ] Tratamento de erro para chave ausente
+- [ ] **Configuração do cliente**
+  - [ ] baseURL: `https://api.deepseek.com`
+  - [ ] Timeout e retry automático
+  - [ ] Headers customizados se necessário
+
+### **Task 5: Testes e Validação**
+- [ ] **Testar implementação básica**
+  - [ ] Criar embedding de texto simples
+  - [ ] Validar formato de resposta
+  - [ ] Verificar dimensões do embedding
+- [ ] **Testar casos de erro**
+  - [ ] API key inválida
+  - [ ] Network timeout
+  - [ ] Modelo não encontrado
+
+### **Task 6: Integração com Factory**
+- [ ] **Atualizar EmbeddingFactory**
+  - [ ] Garantir registro do DeepSeekProvider
+  - [ ] Testar auto-detection
+  - [ ] Verificar fallback para outros providers
 - [ ] **Testes de integração**
-  - [ ] Testar com modelo nomic-embed-text-v1.5
-  - [ ] Validar dimensões (768 para nomic-embed-text-v1.5)
-  - [ ] Testar fallback para providers de API
- 
-### **Task 6: Tratamento de Erros**
-- [ ] **Validação de dependências**
-  - [ ] Verificar se llama.cpp existe
-  - [ ] Validar modelo GGUF disponível
-  - [ ] Mensagens de erro amigáveis
-- [ ] **Fallback robusto**
-  - [ ] Tentar providers de API se llama.cpp falhar
-  - [ ] Logging detalhado para debug
-  - [ ] Timeout e retry logic
- 
-### **Task 7: Performance e Otimização**
-- [ ] **Cache de embeddings**
-  - [ ] Cache em memória para textos repetidos
-  - [ ] Persistência opcional em disco
-  - [ ] TTL para cache expiração
-- [ ] **Otimizações**
-  - [ ] Reutilizar processo llama.cpp se possível
-  - [ ] Streaming para textos longos
-  - [ ] Batch processing automático
- 
-### **Task 8: Documentação e Exemplos**
-- [ ] **Documentação de uso**
-  - [ ] Como instalar e configurar llama.cpp
-  - [ ] Exemplos de configuração
-  - [ ] Guia de troubleshooting
-- [ ] **Exemplos práticos**
-  - [ ] Uso básico com texto
-  - [ ] Processamento de arquivos
-  - [ ] Batch processing
- 
+  - [ ] Testar com embed() automático
+  - [ ] Testar configuração explícita
+  - [ ] Validar ordem de providers
+
+### **Task 7: Documentação**
+- [ ] **Atualizar README**
+  - [ ] Como configurar DeepSeek
+  - [ ] Exemplo de uso
+  - [ ] Variáveis de ambiente necessárias
+- [ ] **Documentação técnica**
+  - [ ] Por que usamos SDK OpenAI
+  - [ ] Diferenças da implementação
+  - [ ] Limitações e considerações
+
+### **Task 8: Limpeza e Finalização**
+- [ ] **Remover código antigo**
+  - [ ] Se houver implementação manual
+  - [ ] Arquivos não utilizados
+  - [ ] Dependências obsoletas
+- [ ] **Validação final**
+  - [ ] Teste completo do fluxo
+  - [ ] Performance check
+  - [ ] Code review e lint
+
 ---
- 
-## 🎯 **Status Atual**
- 
+
+## 🚀 **Status Atual**
+
 ### **✅ Concluído:**
-- ✅ Análise do problema sharp
-- ✅ Remoção de dependências problemáticas
-- ✅ Compilação do llama.cpp
-- ✅ Download do modelo nomic-embed-text-v1.5.Q4_K_M.gguf
-- ✅ Análise inicial da API llama.cpp
- 
+- ✅ Removido TODO.md do .gitignore
+- ✅ Plano criado
+
 ### **🔄 Em Progresso:**
-- 🔄 Estudo da API embedding.cpp
-- 🔄 Planejamento da arquitetura
- 
+- 🔄 Task 1: Adicionar dependência OpenAI
+
 ### **⏳ Próximos Passos:**
-- ⏳ Implementar LlamaCppProvider básico
-- ⏳ Testar comando llama-embedding
-- ⏳ Integrar com factory existente
- 
+- ⏳ Instalar SDK OpenAI
+- ⏳ Analisar implementação atual
+- ⏳ Implementar novo provider
+
 ---
- 
-## 📝 **Notas Importantes:**
- 
-### **Design Decisions:**
-1. **Sem dependências externas** - Usa llama.cpp nativo
-2. **Detecção automática** - Busca na raiz do usuário
-3. **Fallback inteligente** - API providers se local falhar
-4. **Performance first** - Cache e otimizações
-5. **Minimalista** - Interface simples como design principle
- 
-### **Technical Considerations:**
-- **Modelo alvo:** nomic-embed-text-v1.5 (768 dimensões)
-- **Formato:** GGUF quantizado (Q4_K_M)
-- **Saída:** JSON ou array format
-- **Pooling:** mean (padrão para embeddings)
-- **Normalização:** euclidean (padrão)
- 
-### **Path Strategy:**
+
+## 📝 **Notas Importantes**
+
+### **Vantagens da Abordagem:**
+✅ Não precisa criar client do zero  
+✅ Retry automático, error handling, tipos TypeScript  
+✅ Código limpo e mantido pela OpenAI  
+✅ Compatibilidade futura garantida  
+
+### **Implementação Esperada:**
+```typescript
+import OpenAI from 'openai';
+
+const deepseek = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com'
+});
+
+const response = await deepseek.embeddings.create({
+  model: 'deepseek-chat',
+  input: 'Your text'
+});
 ```
-~/
-├── llama.cpp/
-│   ├── llama-embedding          # Executável compilado
-│   └── models/
-│       └── nomic-embed-text-v1.5.Q4_K_M.gguf
-└── embed-kit/                 # Nossa biblioteca
-    └── node_modules/           # Dependências do projeto
-```
- 
+
+### **Modelos Disponíveis:**
+- `deepseek-chat` (para embeddings)
+- Verificar documentação para modelos específicos
+
 ---
- 
-## 🚀 **Ready to Start!**
- 
-**Próximo passo:** Implementar Task 1 - Análise completa da API llama.cpp
+
+**Próximo passo:** Iniciar Task 1 - Instalar SDK OpenAI
