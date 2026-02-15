@@ -94,6 +94,8 @@ llama.cpp/
 # Core heavy files (keep src for development)
 *.bin
 *.safetensors
+core/models/
+*.gguf
 
 # Temporary files
 *.tmp
