@@ -8,6 +8,10 @@ const logger = Logger.createModuleLogger('mistral');
 export class MistralProvider extends EmbeddingProvider {
   private client: Mistral;
 
+  protected getModel(): string {
+    return this.config.model || 'mistral-embed';
+  }
+
   constructor(config: EmbedConfig) {
     super(config);
     

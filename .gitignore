@@ -44,7 +44,6 @@ build/
 .vitepress/
 .docusaurus
 .serverless/
-.fusebox/
 .dynamodb/
 .firebase/
 
@@ -80,6 +79,7 @@ pnpm-lock.yaml
 # Development files
 tests/
 docs/
+TODO.md
 PUBLISH.md
 l.md
 modules.d.ts
@@ -92,8 +92,6 @@ test-integration.*
 llama.cpp/
 
 # Core heavy files (keep src for development)
-core/models/
-*.gguf
 *.bin
 *.safetensors
 
@@ -105,6 +103,11 @@ core/models/
 lib-cov
 bower_components
 
-CDM.md
+# Documentation files (keep README for reference)
+CMD.md
 
 .npmrc
+
+# Native build files (keep source, remove build)
+native/build/
+native/node_modules/

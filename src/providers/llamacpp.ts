@@ -1,9 +1,11 @@
-import { access, constants } from 'fs/promises';
-import { join, resolve } from 'path';
+import { access, constants, readFile as fsReadFile } from 'fs/promises';
+import { join, resolve, dirname } from 'path';
 import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
 import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
 import { logger } from '@src/util/logger';
 import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Llama.cpp Provider - Local embeddings using llama.cpp directly
@@ -12,12 +14,6 @@ import * as http from 'http';
 
 // Try to import native module
 let nativeModule: any = null;
-try {
-  nativeModule = require('../../native');
-  logger.info('Using native Llama.cpp module');
-} catch (error) {
-  logger.warn('Native module not available, falling back to HTTP');
-}
 
 // Extend EmbedConfig to include llamaPath
 interface LlamaCppConfig extends EmbedConfig {
@@ -36,15 +32,54 @@ export class LlamaCppProvider extends EmbeddingProvider {
     this.llamaPath = config.llamaPath || './llama.cpp/build/bin/llama-embedding';
     this.useNative = !!nativeModule;
     
-    if (this.useNative) {
-      try {
-        this.nativeModel = nativeModule.create(this.modelPath);
-        logger.info(`Llama.cpp provider initialized with native module: ${this.modelPath}`);
-      } catch (error) {
-        logger.error(`Failed to initialize native module: ${error}`);
-        this.useNative = false;
+    // Initialize native module asynchronously
+    this.initializeNativeModule();
+  }
+
+  private async initializeNativeModule(): Promise<void> {
+    try {
+      // Try different paths for native module
+      const possiblePaths = [
+        // Try the native loader
+        './native-loader.mjs',
+        'vecbox/native-loader.mjs',
+        process.cwd() + '/node_modules/vecbox/native-loader.mjs'
+      ];
+      
+      logger.debug(`Trying to load native module from paths: ${possiblePaths.join(', ')}`);
+      
+      for (const path of possiblePaths) {
+        try {
+          // Use dynamic import for ES modules
+          const module = await import(path);
+          if (module.default || module) {
+            nativeModule = module.default || module;
+            this.useNative = !!nativeModule;
+            logger.info(`Using native Llama.cpp module from: ${path}`);
+            
+            // Initialize native model
+            try {
+              this.nativeModel = nativeModule.createModel(this.modelPath);
+              logger.info(`Llama.cpp provider initialized with native module: ${this.modelPath}`);
+            } catch (error) {
+              logger.error(`Failed to initialize native module: ${error}`);
+              this.useNative = false;
+              this.nativeModel = null;
+            }
+            return;
+          }
+        } catch (e) {
+          logger.debug(`Failed to load native module from ${path}: ${e}`);
+          // Continue to next path
+        }
       }
-    } else {
+      
+      if (!nativeModule) {
+        logger.warn('Native module not available, falling back to HTTP');
+        logger.info(`Llama.cpp provider initialized with HTTP fallback: ${this.modelPath}`);
+      }
+    } catch (error) {
+      logger.warn('Native module not available, falling back to HTTP');
       logger.info(`Llama.cpp provider initialized with HTTP fallback: ${this.modelPath}`);
     }
   }
@@ -67,43 +102,31 @@ export class LlamaCppProvider extends EmbeddingProvider {
 
   async isReady(): Promise<boolean> {
     try {
+      logger.debug(`Llama.cpp isReady check - useNative: ${this.useNative}, hasNativeModel: ${!!this.nativeModel}`);
+      
       if (this.useNative && this.nativeModel) {
         // Native module is ready if model was loaded successfully
+        logger.debug('Native module ready, returning true');
         return true;
       }
       
       // Fallback to HTTP check
+      logger.debug(`Checking llamaPath: ${this.llamaPath}`);
       await access(this.llamaPath, constants.F_OK);
       await access(this.llamaPath, constants.X_OK);
+      logger.debug('llamaPath accessible');
       
       // Check if model file exists
       const modelPath = await this.getModelPath();
+      logger.debug(`Got modelPath: ${modelPath}`);
       await access(modelPath, constants.F_OK);
+      logger.debug('Model file accessible');
       
       logger.debug('Llama.cpp provider is ready');
       return true;
     } catch (error: unknown) {
       logger.error(`Llama.cpp readiness check failed: ${(error instanceof Error ? error.message : String(error))}`);
       return false;
-    }
-  }
-
-  private async loadGGUFModel(modelPath: string): Promise<Buffer> {
-    try {
-      logger.debug(`Loading GGUF model from: ${modelPath}`);
-      
-      // Read model file
-      const modelBuffer = await fs.readFile(modelPath);
-      
-      if (!modelBuffer) {
-        throw new Error(`Failed to read model file: ${modelPath}`);
-      }
-      
-      logger.debug(`Model file loaded, size: ${modelBuffer.length} bytes`);
-      return modelBuffer;
-    } catch (error) {
-      logger.error(`Failed to load GGUF model: ${error instanceof Error ? error.message : String(error)}`);
-      throw error;
     }
   }
 
@@ -132,7 +155,12 @@ export class LlamaCppProvider extends EmbeddingProvider {
 
       // Use native module for now
       if (this.useNative && this.nativeModel) {
-        const embedding = this.nativeModel.embed(text);
+        // Store the model reference for cleanup
+        const modelRef = this.nativeModel;
+        
+        // Use the native module functions directly with the model reference
+        // NOTE: C++ expects (modelPtr, text) but we're passing (text, modelRef)
+        const embedding = nativeModule.getEmbedding(modelRef, text);
         
         return {
           embedding,
@@ -142,8 +170,8 @@ export class LlamaCppProvider extends EmbeddingProvider {
         };
       }
 
-      // TODO: Implement direct Llama.cpp core usage in future
-      throw new Error('Direct Llama.cpp core integration not yet implemented. Please use HTTP fallback or wait for next version.');
+      // Fallback: return error if native module not available
+      throw new Error('Direct Llama.cpp integration requires native module. Please ensure native module is properly compiled.');
     } catch (error: unknown) {
       logger.error(`Llama.cpp embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
@@ -178,42 +206,8 @@ export class LlamaCppProvider extends EmbeddingProvider {
         };
       }
 
-      // Fallback to HTTP batch processing
-      const texts = [];
-      for (const input of inputs) {
-        const text = await this.readInput(input);
-        if (text.trim()) {
-          texts.push(text);
-        }
-      }
-      
-      if (texts.length === 0) {
-        throw new Error('No valid texts to embed');
-      }
-
-      // For batch processing, use HTTP API
-      const modelPath = await this.getModelPath();
-      const requests = inputs.map((input, v) => ({
-        input: input.text || '',
-        model: modelPath,
-        pooling: 'mean',
-        normalize: 2
-      }));
-
-      // Execute batch requests (for now, do individual requests)
-      const embeddings: number[][] = [];
-      for (const request of requests) {
-        const result = await this.executeLlamaEmbedding([JSON.stringify(request)]);
-        const embedding = this.parseRawOutput(result.stdout);
-        embeddings.push(embedding);
-      }
-      
-      return {
-        embeddings,
-        dimensions: embeddings[0]?.length || 0,
-        model: this.getModel(),
-        provider: 'llamacpp',
-      };
+      // Fallback: return error if native module not available
+      throw new Error('Direct Llama.cpp integration requires native module. Please ensure native module is properly compiled.');
     } catch (error: unknown) {
       logger.error(`Llama.cpp batch embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
@@ -236,5 +230,120 @@ export class LlamaCppProvider extends EmbeddingProvider {
   // Protected methods
   protected getModel(): string {
     return this.modelPath;
+  }
+
+  private async getModelPath(): Promise<string> {
+    // If modelPath is already absolute, return as-is
+    if (this.modelPath.startsWith('/') || this.modelPath.startsWith('./')) {
+      return this.modelPath;
+    }
+    
+    // Get package directory dynamically
+    const packageDir = this.getPackageDirectory();
+    logger.debug(`Package directory resolved to: ${packageDir}`);
+    
+    // Try to resolve model path with multiple strategies
+    const possiblePaths = [
+      resolve(this.modelPath),                    // Current directory
+      join('core/models', this.modelPath),       // core/models subdirectory
+      join('models', this.modelPath),            // models subdirectory
+      join(packageDir, 'core/models', this.modelPath),  // Package installation
+      join(packageDir, 'models', this.modelPath),      // Package models
+    ];
+    
+    logger.debug(`Trying paths: ${possiblePaths.join(', ')}`);
+    
+    for (const path of possiblePaths) {
+      try {
+        await access(path, constants.F_OK);
+        logger.debug(`Found model at: ${path}`);
+        return path;
+      } catch (e) {
+        // Continue to next path
+      }
+    }
+    
+    // Return original path if none found (will fail later with proper error)
+    logger.debug(`Model not found, returning original path: ${this.modelPath}`);
+    return this.modelPath;
+  }
+
+  private getPackageDirectory(): string {
+    try {
+      // Try to get package directory from current module
+      const moduleUrl = new URL('.', import.meta.url);
+      let pkgDir: string = moduleUrl.pathname;
+      logger.debug(`Initial module URL: ${moduleUrl.pathname}`);
+      
+      // Check if we're in a development environment (dist folder)
+      logger.debug(`Checking if pkgDir ends with /dist: "${pkgDir}"`);
+      if (pkgDir.endsWith('/dist') || pkgDir.endsWith('/dist/')) {
+        logger.debug('Detected development environment, checking for installation...');
+        // We're in development, need to find the actual installed package
+        
+        // Try to find the installed package
+        const possiblePaths = [
+          './node_modules/vecbox',
+          '../node_modules/vecbox',
+          '../../node_modules/vecbox',
+          process.cwd() + '/node_modules/vecbox'
+        ];
+        
+        for (const possiblePath of possiblePaths) {
+          if (fs.existsSync(path.join(possiblePath, 'package.json'))) {
+            logger.debug(`Found installed package at: ${possiblePath}`);
+            return possiblePath;
+          }
+        }
+      }
+      
+      // If we're in a pnpm structure, go up to find the actual vecbox package
+      if (pkgDir.includes('.pnpm')) {
+        logger.debug('Detected pnpm structure, searching for vecbox package...');
+        // We're in a pnpm symlinked structure, need to find the actual package
+        const segments = pkgDir.split('/node_modules/.pnpm/');
+        if (segments.length > 1) {
+          // Find the vecbox package in the pnpm structure
+          const pnpmBase = segments[0] + '/node_modules/.pnpm/';
+          const vecboxDirs = (fs.readdirSync(pnpmBase) as string[])
+            .filter((dir: string) => dir.startsWith('vecbox@'))
+            .map((dir: string) => path.join(pnpmBase, dir, 'node_modules/vecbox'))
+            .filter((dir: string) => fs.existsSync(path.join(dir, 'package.json')));
+          
+          logger.debug(`Found vecbox directories: ${vecboxDirs.join(', ')}`);
+          
+          if (vecboxDirs.length > 0) {
+            pkgDir = vecboxDirs[0] || pkgDir;
+            logger.debug(`Using pnpm vecbox directory: ${pkgDir}`);
+          }
+        }
+      }
+      
+      logger.debug(`Final package directory: ${pkgDir}`);
+      return pkgDir;
+    } catch (error) {
+      logger.debug(`getPackageDirectory failed: ${error}`);
+      // Fallback: try common node_modules locations
+      
+      const possiblePaths = [
+        './node_modules/vecbox',
+        '../node_modules/vecbox',
+        '../../node_modules/vecbox',
+        process.cwd() + '/node_modules/vecbox'
+      ];
+      
+      logger.debug(`Trying fallback paths: ${possiblePaths.join(', ')}`);
+      
+      for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(path.join(possiblePath, 'package.json'))) {
+          logger.debug(`Using fallback path: ${possiblePath}`);
+          return possiblePath;
+        }
+      }
+      
+      // Final fallback: use current directory
+      logger.debug(`Using final fallback: ${process.cwd()}`);
+      return process.cwd();
+    }
   }
 }

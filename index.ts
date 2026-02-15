@@ -1,7 +1,7 @@
 /**
- * Embedbox v1.0.0 - Main Entry Point
+ * Vecbox v0.2.3 - Main Entry Point
  * 
- * A minimal and powerful embedding library that supports multiple providers
+ * A minimal and powerful vector library that supports multiple providers
  * with automatic detection and fallback capabilities.
  */
 
@@ -24,7 +24,7 @@ export { EmbeddingFactory } from './src/factory/EmbeddingFactory.js';
 export { EmbeddingProvider } from './src/providers/base/EmbeddingProvider.js';
 
 // Version information
-export const VERSION = '1.0.0';
+export const VERSION = '0.2.3';
 
 /**
  * Get library version
@@ -37,11 +37,11 @@ export function getVersion(): string {
  * Library information
  */
 export const LIB_INFO = {
-  name: 'embedbox',
+  name: 'vecbox',
   version: VERSION,
   description: 'A minimal and powerful embedding library',
-  homepage: 'https://embedbox.dev',
-  repository: 'https://github.com/embedbox/embedbox.git',
+  homepage: 'https://boxsafe.dev',
+  repository: 'https://github.com/boxsafe/vecbox.git',
   supportedProviders: [
     'openai',
     'gemini', 

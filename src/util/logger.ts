@@ -33,9 +33,14 @@ export class Logger {
         [LogLevel.ERROR]: 'ERROR',
     };
 
-    constructor(moduleName: string = 'embedbox', level: LogLevel = LogLevel.INFO) {
+    constructor(moduleName: string = 'embedbox', level?: LogLevel) {
         this.moduleName = moduleName;
-        this.currentLevel = level;
+        // Check for DEBUG environment variable
+        if (level === undefined) {
+            this.currentLevel = process.env.DEBUG === 'true' ? LogLevel.DEBUG : LogLevel.INFO;
+        } else {
+            this.currentLevel = level;
+        }
     }
 
     static getInstance(moduleName?: string, level?: LogLevel): Logger {

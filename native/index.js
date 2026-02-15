@@ -1,4 +1,16 @@
-const binding = require('./build/Release/llama_embedding.node');
+// Try to load the native binding from different locations
+let binding;
+try {
+  binding = require('./llama_embedding.node');
+} catch (error) {
+  try {
+    binding = require('./build/Release/llama_embedding.node');
+  } catch (fallbackError) {
+    throw new Error(`Failed to load native binding: ${fallbackError.message}`);
+  }
+}
+
+console.log(`Native binding loaded from: ${binding ? 'success' : 'failed'}`);
 
 class LlamaEmbedding {
   constructor(modelPath) {

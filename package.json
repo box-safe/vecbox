@@ -1,6 +1,6 @@
 {
   "name": "vecbox",
-  "version": "0.2.2",
+  "version": "0.2.10",
   "description": "A minimal and powerful embedding library that supports multiple providers with automatic detection and fallback capabilities",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
     "dist",
     "src",
     "native",
+    "core/models",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -66,6 +67,9 @@
     "openai": "^6.21.0"
   },
   "devDependencies": {
-    "tsup": "^8.5.1"
+    "@types/node": "^25.2.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
