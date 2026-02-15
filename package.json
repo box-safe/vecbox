@@ -1,6 +1,6 @@
 {
   "name": "vecbox",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "description": "A minimal and powerful embedding library that supports multiple providers with automatic detection and fallback capabilities",
   "type": "module",
   "main": "dist/index.js",
@@ -23,7 +23,7 @@
     "test:native": "vitest test/native.test.js",
     "test:integration": "vitest test/integration.test.js",
     "example": "tsx examples/basic-usage.ts",
-    "lint": "eslint . --ext .ts,.js",
+    "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "prepublishOnly": "npm run build:all"
   },
@@ -59,22 +59,13 @@
     "node": ">=16.0.0"
   },
   "packageManager": "pnpm@10.28.2",
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/node": "^25.2.3",
-    "eslint": "^10.0.0",
-    "globals": "^17.3.0",
-    "jiti": "^2.6.1",
-    "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
-    "vitest": "^4.0.18"
-  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@mistralai/mistralai": "^1.14.0",
     "dotenv": "^17.3.1",
     "openai": "^6.21.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
   }
 }

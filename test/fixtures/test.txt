@@ -1,2 +1,0 @@
-This is a test file for embedding generation.
-It contains sample text to test the Llama.cpp provider.

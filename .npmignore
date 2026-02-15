@@ -1,4 +1,4 @@
-# Development files (keep src/ for TypeScript users)
+# Development files
 examples/
 tests/
 docs/
@@ -85,6 +85,7 @@ CMD.md
 
 .npmrc
 
-#develloper dir 
-src/
+# Native build files (keep source, remove build)
+native/build/
+native/node_modules/
 

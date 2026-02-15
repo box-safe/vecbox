@@ -1,14 +1,14 @@
-/**
- * Llama.cpp Provider - Local embeddings using llama.cpp directly
- * Uses native N-API module for better performance
- */
-
 import { access, constants } from 'fs/promises';
 import { join, resolve } from 'path';
 import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
 import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
 import { logger } from '@src/util/logger';
 import * as http from 'http';
+
+/**
+ * Llama.cpp Provider - Local embeddings using llama.cpp directly
+ * Uses native N-API module for better performance
+ */
 
 // Try to import native module
 let nativeModule: any = null;
@@ -88,6 +88,39 @@ export class LlamaCppProvider extends EmbeddingProvider {
     }
   }
 
+  private async loadGGUFModel(modelPath: string): Promise<Buffer> {
+    try {
+      logger.debug(`Loading GGUF model from: ${modelPath}`);
+      
+      // Read model file
+      const modelBuffer = await fs.readFile(modelPath);
+      
+      if (!modelBuffer) {
+        throw new Error(`Failed to read model file: ${modelPath}`);
+      }
+      
+      logger.debug(`Model file loaded, size: ${modelBuffer.length} bytes`);
+      return modelBuffer;
+    } catch (error) {
+      logger.error(`Failed to load GGUF model: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
+
+  private generateEmbedding(modelBuffer: Buffer, text: string): number[] {
+    // Use the loaded model to generate embedding
+    logger.debug(`Generating embedding with model buffer (${modelBuffer.length} bytes)`);
+    
+    // TODO: Implement actual Llama.cpp embedding generation
+    // For now, return mock embedding based on text length
+    const embedding = [];
+    for (let i = 0; i < Math.min(text.length, 768); i++) {
+      embedding.push(Math.sin(i * 0.1) * (i % 10));
+    }
+    
+    return embedding;
+  }
+
   async embed(input: EmbedInput): Promise<EmbedResult> {
     try {
       logger.debug(`Embedding text with llama.cpp: ${this.getModel()}`);
@@ -97,8 +130,8 @@ export class LlamaCppProvider extends EmbeddingProvider {
         throw new Error('Text input cannot be empty');
       }
 
+      // Use native module for now
       if (this.useNative && this.nativeModel) {
-        // Use native module
         const embedding = this.nativeModel.embed(text);
         
         return {
@@ -109,26 +142,8 @@ export class LlamaCppProvider extends EmbeddingProvider {
         };
       }
 
-      // Fallback to HTTP
-      const requestBody = {
-        input: text,
-        model: await this.getModelPath(),
-        pooling: 'mean',
-        normalize: 2
-      };
-
-      // Execute HTTP request to llama.cpp server
-      const result = await this.executeLlamaEmbedding([JSON.stringify(requestBody)]);
-      
-      // Parse output to extract embedding
-      const embedding = this.parseRawOutput(result.stdout);
-      
-      return {
-        embedding,
-        dimensions: embedding.length,
-        model: this.getModel(),
-        provider: 'llamacpp',
-      };
+      // TODO: Implement direct Llama.cpp core usage in future
+      throw new Error('Direct Llama.cpp core integration not yet implemented. Please use HTTP fallback or wait for next version.');
     } catch (error: unknown) {
       logger.error(`Llama.cpp embedding failed: ${(error instanceof Error ? error.message : String(error))}`);
       throw error;
@@ -178,7 +193,7 @@ export class LlamaCppProvider extends EmbeddingProvider {
 
       // For batch processing, use HTTP API
       const modelPath = await this.getModelPath();
-      const requests = inputs.map(input => ({
+      const requests = inputs.map((input, v) => ({
         input: input.text || '',
         model: modelPath,
         pooling: 'mean',
@@ -221,150 +236,5 @@ export class LlamaCppProvider extends EmbeddingProvider {
   // Protected methods
   protected getModel(): string {
     return this.modelPath;
-  }
-
-  // Private helper methods
-  private async getModelPath(): Promise<string> {
-    // Try different model paths
-    const possiblePaths = [
-      this.modelPath, // As provided
-      join('./llama.cpp/models', this.modelPath), // In llama.cpp/models
-      join('./llama.cpp', this.modelPath), // In llama.cpp root
-      this.modelPath // Fallback
-    ];
-
-    for (const path of possiblePaths) {
-      try {
-        await access(path, constants.F_OK);
-        return resolve(path);
-      } catch {
-        continue;
-      }
-    }
-
-    throw new Error(`Model file not found: ${this.modelPath}`);
-  }
-
-  private async executeLlamaEmbedding(args: string[]): Promise<{stdout: string; stderr: string}> {
-    return new Promise((resolve, reject) => {
-      // Use HTTP API instead of CLI for cleaner output
-      const port = 8080; // Default llama.cpp server port
-      
-      // Parse the request body from args[0] (JSON string)
-      let requestBody;
-      try {
-        requestBody = JSON.parse(args[0] || '{}');
-      } catch {
-        reject(new Error('Invalid request body for HTTP API'));
-        return;
-      }
-
-      const postData = JSON.stringify(requestBody);
-
-      const options = {
-        hostname: 'localhost',
-        port: port,
-        path: '/embedding',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      };
-
-      const req = http.request(options, (res: http.IncomingMessage) => {
-        let data = '';
-        
-        res.on('data', (chunk: Buffer | string) => {
-          data += chunk;
-        });
-        
-        res.on('end', () => {
-          if (res.statusCode === 200) {
-            resolve({ stdout: data, stderr: '' });
-          } else {
-            reject(new Error(`HTTP ${res.statusCode}: ${data}`));
-          }
-        });
-      });
-
-      req.on('error', (error: Error) => {
-        reject(new Error(`Failed to connect to llama.cpp server: ${(error instanceof Error ? error.message : String(error))}`));
-      });
-
-      req.write(postData);
-      req.end();
-    });
-  }
-
-  private parseRawOutput(output: string): number[] {
-    try {
-      const response = JSON.parse(output);
-      
-      logger.debug(`PARSE DEBUG: Response type: ${typeof response}`);
-      logger.debug(`PARSE DEBUG: Is Array: ${Array.isArray(response)}`);
-      
-      // CASE 1: Array of objects with nested embedding
-      // Format: [{index: 0, embedding: [[...]]}]
-      if (Array.isArray(response) && response.length > 0) {
-        const first = response[0];
-        
-        if (first && first.embedding && Array.isArray(first.embedding)) {
-          const emb = first.embedding;
-          
-          // Check if nested: [[...]]
-          if (Array.isArray(emb[0])) {
-            const flat = emb[0]; // ← Take the inner array
-            logger.debug(`Parsed ${flat.length} dimensions (nested)`);
-            return flat;
-          }
-          
-          // Not nested: [...]
-          logger.debug(`Parsed ${emb.length} dimensions (direct)`);
-          return emb;
-        }
-      }
-      
-      // CASE 2: Direct object {embedding: [...]}
-      if (response.embedding && Array.isArray(response.embedding)) {
-        const emb = response.embedding;
-        
-        // Check nested
-        if (Array.isArray(emb[0])) {
-          return emb[0];
-        }
-        
-        return emb;
-      }
-      
-      // CASE 3: Direct array of numbers
-      if (Array.isArray(response) && typeof response[0] === 'number') {
-        logger.debug(`Parsed ${response.length} dimensions (flat array)`);
-        return response;
-      }
-      
-      throw new Error(`Unexpected format: ${JSON.stringify(Object.keys(response))}`);
-      
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Parse failed: ${errorMessage}`);
-    }
-  }
-
-  private parseArrayOutput(output: string): number[][] {
-    // Parse array format: [[val1,val2,...], [val1,val2,...], ...]
-    const arrayPattern = /\[([^\]]+)\]/g;
-    const matches = [...output.matchAll(arrayPattern)];
-    
-    if (matches.length === 0) {
-      throw new Error('No array embeddings found in output');
-    }
-
-    const embeddings = matches.map(match => {
-      const values = match[1]?.split(',').map(v => v.trim()) || [];
-      return values.map(v => parseFloat(v)).filter(v => !isNaN(v));
-    }).filter(embedding => embedding.length > 0);
-
-    return embeddings;
   }
 }

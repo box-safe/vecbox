@@ -78,17 +78,20 @@ pnpm-workspace.yaml
 pnpm-lock.yaml
 
 # Development files
-examples/
 tests/
 docs/
 PUBLISH.md
 l.md
 modules.d.ts
+vitest.config.ts
+eslint.config.cjs
+*.test.*
+test-integration.*
 
 # External dependencies
 llama.cpp/
 
-# Core heavy files
+# Core heavy files (keep src for development)
 core/models/
 *.gguf
 *.bin

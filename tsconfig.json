@@ -6,7 +6,6 @@
     "examples/**/*",
     "index.ts",
     "main.ts",
-    "vitest.config.ts",
     "tsup.config.ts"
   ],
   "exclude": [

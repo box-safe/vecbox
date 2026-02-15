@@ -2,7 +2,6 @@ import type { EmbedConfig, ProviderType } from '@src/types/index';
 import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
 import { OpenAIProvider } from '@providers/openai';
 import { GeminiProvider } from '@providers/gemini';
-import { ClaudeProvider } from '@providers/claude';
 import { MistralProvider } from '@providers/mistral';
 import { LlamaCppProvider } from '@providers/llamacpp';
 import { Logger } from '@src/util/logger';
@@ -13,7 +12,6 @@ export class EmbeddingFactory {
   private static providers = new Map<ProviderType, new (config: EmbedConfig) => EmbeddingProvider>([
     ['openai', OpenAIProvider],
     ['gemini', GeminiProvider],
-    ['claude', ClaudeProvider],
     ['mistral', MistralProvider],
     ['llamacpp', LlamaCppProvider], // Local embeddings with llama.cpp
   ]);

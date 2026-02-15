@@ -1,67 +1,78 @@
-# vecbox v0.1.0
+# Vecbox
 
 ![vecbox](./src/images/vecbox.png)
-[![npm version](https://img.shields.io/npm/v/vecbox.svg)](https://www.npmjs.com/package/vecbox)
+[![npm version](https://img.shields.io/npm/v/vecbox.svg)](https://www.npmjs.org/package/vecbox)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Why vecbox?
-
-**One API, multiple providers.** Switch between OpenAI, Gemini, or run locally with Llama.cpp without changing code.
-```typescript
-// Works with any provider
-const result = await autoEmbed({ text: 'Hello, world!' });
-console.log(result.embedding); // [0.1, 0.2, ...]
-```
-
-## Installation
-```bash
-  npm install vecbox
-  pnpm add vecbox
-```
-
-**Zero setup required!** Everything is included - no need to download Llama.cpp or compile anything.
-
-## Quick Start
-
-### Auto-detect (Recommended)
+**One API, multiple providers.** Switch between OpenAI, Gemini, Mistral, or run locally with Llama.cpp using native N-API performance.
 ```typescript
 import { autoEmbed } from 'vecbox';
 
-// Just works - automatically picks the best available provider
-const result = await autoEmbed({ text: 'Your text' });
+// Works with any provider - auto-detects the best available
+const result = await autoEmbed({ text: 'Hello, world!' });
 console.log(result.embedding); // [0.1, 0.2, ...]
 console.log(result.provider);  // 'llamacpp' | 'openai' | 'gemini' | 'mistral'
 ```
+
+## Why Vecbox?
+
+**Universal API** - Write once, run anywhere. Switch providers without changing code.
+
+**Local-First** - Runs on your machine with Llama.cpp. No API costs, no data leaving your server, full privacy.
+
+**Production Ready** - Cloud APIs (OpenAI, Gemini, Mistral) available when you need scale or specific models.
+
+**Native Speed** - C++ bindings via N-API make local embeddings 10x faster than HTTP-based solutions.
+
+## Installation
+```bash
+npm install vecbox
+# or
+pnpm add vecbox
+```
+
+The native module compiles automatically during installation. No manual build steps required.
+
+## Quick Start
+
+### Auto Mode (Recommended)
+
+Let Vecbox choose the best available provider:
+```typescript
+import { autoEmbed } from 'vecbox';
+
+const result = await autoEmbed({ text: 'Your text here' });
+console.log(result.embedding);  // [0.1, 0.2, ...]
+console.log(result.provider);   // Shows which provider was used
+```
+
+Priority order: Llama.cpp (local) → OpenAI → Gemini → Mistral
 
 ### Specific Provider
 ```typescript
 import { embed } from 'vecbox';
 
+// OpenAI
 const result = await embed(
   { provider: 'openai', apiKey: process.env.OPENAI_API_KEY },
   { text: 'Your text' }
 );
 ```
 
-### File Input
+### From Files
 ```typescript
-import { embed } from 'vecbox';
-
-// Embed text from files
 const result = await embed(
-  { provider: 'gemini', apiKey: process.env.GEMINI_API_KEY },
+  { provider: 'gemini', apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY },
   { filePath: './document.txt' }
 );
 ```
 
 ### Batch Processing
 ```typescript
-import { embed } from 'vecbox';
-
 const inputs = [
-  { text: 'First text' },
-  { text: 'Second text' },
-  { text: 'Third text' }
+  { text: 'First document' },
+  { text: 'Second document' },
+  { text: 'Third document' }
 ];
 
 const result = await embed(
@@ -74,25 +85,60 @@ console.log(result.embeddings.length); // 3
 
 ## Providers
 
-<details>
-<summary><b>OpenAI</b></summary>
+### Llama.cpp (Local - Free & Private)
+
+**Advantages:**
+- ✅ Zero API costs
+- ✅ Full privacy (data never leaves your machine)
+- ✅ Works offline
+- ✅ Native C++ performance via N-API
+
+**Setup:**
+```bash
+# 1. Download a GGUF embedding model
+wget https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q4_K_M.gguf
+
+# 2. Place in your project
+mkdir models
+mv nomic-embed-text-v1.5.Q4_K_M.gguf models/
+```
+
+**Usage:**
+```typescript
+// Auto-detect (uses local model automatically)
+const result = await autoEmbed({ text: 'Your text' });
+
+// Explicit path
+const result = await embed(
+  { provider: 'llamacpp', model: './models/nomic-embed-text-v1.5.Q4_K_M.gguf' },
+  { text: 'Your text' }
+);
+```
+
+**Recommended Models:**
+- `nomic-embed-text-v1.5.Q4_K_M.gguf` (81MB) - Best overall
+- `bge-base-en-v1.5.Q4_K_M.gguf` (133MB) - Higher quality
+- `bge-small-en-v1.5.Q4_0.gguf` (33MB) - Fastest, smaller
+
+### OpenAI
 ```typescript
 await embed(
   {
     provider: 'openai',
-    model: 'text-embedding-3-small', // or text-embedding-3-large
+    model: 'text-embedding-3-small', // or 'text-embedding-3-large'
     apiKey: process.env.OPENAI_API_KEY
   },
   { text: 'Your text' }
 );
 ```
 
-**Setup:** Get API key at [platform.openai.com](https://platform.openai.com)
+**Setup:** Get API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
 
-</details>
+**Models:**
+- `text-embedding-3-small` - Fast, cost-effective
+- `text-embedding-3-large` - Highest quality
 
-<details>
-<summary><b>Google Gemini</b></summary>
+### Google Gemini
 ```typescript
 await embed(
   {
@@ -104,36 +150,9 @@ await embed(
 );
 ```
 
-**Setup:** Get API key at [aistudio.google.com](https://aistudio.google.com)
+**Setup:** Get API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 
-</details>
-
-<details>
-<summary><b>Llama.cpp (Local)</b></summary>
-```typescript
-await embed(
-  { provider: 'llamacpp', model: 'nomic-embed-text-v1.5.Q4_K_M.gguf' },
-  { text: 'Your text' }
-);
-```
-
-**Setup:**
-```bash
-# 1. Install
-git clone https://github.com/ggerganov/llama.cpp
-cd llama.cpp && make llama-server
-
-# 2. Download model
-wget https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q4_K_M.gguf
-
-# 3. Run server
-./llama-server -m nomic-embed-text-v1.5.Q4_K_M.gguf --embedding --port 8080
-```
-
-</details>
-
-<details>
-<summary><b>Mistral</b></summary>
+### Mistral AI
 ```typescript
 await embed(
   {
@@ -145,153 +164,38 @@ await embed(
 );
 ```
 
-**Setup:** Get API key at [mistral.ai](https://mistral.ai)
+**Setup:** Get API key at [console.mistral.ai](https://console.mistral.ai)
 
-</details>
+## Environment Variables
 
-## 🚀 Features
-
-- **🎯 One API, Multiple Providers** - Switch between OpenAI, Gemini, Mistral, or local Llama.cpp
-- **🤖 Auto-Detection** - Automatically picks the best available provider
-- **⚡ Native Performance** - Llama.cpp integration with N-API (10x faster than HTTP)
-- **🔄 Smart Fallbacks** - Never fails, always has a backup provider
-- **📁 File Support** - Embed text from files directly
-- **📦 Batch Processing** - Process multiple texts efficiently
-- **🛡️ Type Safe** - Full TypeScript support
-- **🌍 Zero Dependencies** - No external downloads or setup required
-
-## 🏆 Why Vecbox?
-
-**vs Other Libraries:**
-- ✅ **Native Llama.cpp** - Others use HTTP, we use direct C++ integration
-- ✅ **Auto-Detection** - Others require manual provider selection
-- ✅ **Zero Setup** - Others need external downloads and configuration
-- ✅ **Multiple Providers** - Others are limited to one provider
-- ✅ **Smart Fallbacks** - Others fail when a provider is unavailable
-
-**Performance:**
-- **Llama.cpp Native**: ~50ms per embedding
-- **Cloud Providers**: ~100-300ms per embedding
-- **HTTP Llama.cpp**: ~500ms+ per embedding
-
-## Common Use Cases
-
-### Semantic Search
-```typescript
-// Helper function for cosine similarity
-function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce((sum, val, i) => sum + val * vecB[i], 0);
-  const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val * val, 0));
-  return dotProduct / (magnitudeA * magnitudeB);
-}
-
-const query = await autoEmbed({ text: 'machine learning' });
-const docs = await Promise.all(
-  documents.map(doc => autoEmbed({ text: doc }))
-);
-
-// Find most similar
-const scores = docs.map(doc => 
-  cosineSimilarity(query.embedding, doc.embedding)
-);
-const mostSimilar = scores.indexOf(Math.max(...scores));
-console.log(`Best match: ${documents[mostSimilar]}`);
+Create a `.env` file in your project root:
+```bash
+# Optional - only needed for cloud providers
+OPENAI_API_KEY=sk-...
+GOOGLE_GENERATIVE_AI_API_KEY=...
+MISTRAL_API_KEY=...
 ```
 
-### Text Similarity
+Vecbox works without any API keys when using Llama.cpp locally.
+
+## API Reference
+
+### `autoEmbed(input: Input): Promise<Result>`
+
+Automatically selects the best available provider.
+
+**Input:**
 ```typescript
-function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce((sum, val, i) => sum + val * vecB[i], 0);
-  const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val * val, 0));
-  return dotProduct / (magnitudeA * magnitudeB);
-}
-
-const [emb1, emb2] = await Promise.all([
-  autoEmbed({ text: 'cat sleeping' }),
-  autoEmbed({ text: 'cat napping' })
-]);
-
-const similarity = cosineSimilarity(emb1.embedding, emb2.embedding);
-console.log(`Similarity: ${similarity.toFixed(3)}`); // → 0.95 (very similar)
-```
-
-### Batch Processing
-```typescript
-const results = await embed(
-  { provider: 'openai', apiKey: 'key' },
-  [
-    { text: 'Text 1' },
-    { text: 'Text 2' },
-    { filePath: './doc.txt' }
-  ]
-);
-// → { embeddings: [[...], [...], [...]], dimensions: 1536 }
-
-console.log(`Processed ${results.embeddings.length} texts`);
-console.log(`Dimensions: ${results.dimensions}`);
-```
-
-### File Processing
-```typescript
-import { readdir } from 'fs/promises';
-import { join } from 'path';
-
-async function embedAllFiles(dirPath: string) {
-  const files = await readdir(dirPath);
-  const textFiles = files.filter(file => file.endsWith('.txt'));
-  
-  const inputs = textFiles.map(file => ({
-    filePath: join(dirPath, file)
-  }));
-  
-  const results = await embed(
-    { provider: 'llamacpp' },
-    inputs
-  );
-  
-  return textFiles.map((file, index) => ({
-    file,
-    embedding: results.embeddings[index]
-  }));
-}
-
-const embeddings = await embedAllFiles('./documents');
-console.log(`Processed ${embeddings.length} files`);
-```
-
-## API
-
-### `autoEmbed(input)`
-
-Auto-detects best provider in priority order:
-1. **Llama.cpp** (Local & Free)
-2. **OpenAI** (if API key available)
-3. **Gemini** (if API key available)
-4. **Mistral** (if API key available)
-
-```typescript
-await autoEmbed({ text: string } | { filePath: string })
-```
-
-### `embed(config, input)`
-
-Explicit provider selection.
-```typescript
-await embed(
-  { provider, model?, apiKey?, baseUrl?, timeout?, maxRetries? },
-  { text: string } | { filePath: string } | Array
-)
+{ text: string } | { filePath: string }
 ```
 
 **Returns:**
 ```typescript
 {
-  embedding: number[],
-  dimensions: number,
-  provider: string,
-  model: string,
+  embedding: number[];      // The embedding vector
+  dimensions: number;       // Vector dimensions
+  provider: string;         // Which provider was used
+  model: string;           // Model name
   usage?: {
     promptTokens?: number;
     totalTokens?: number;
@@ -299,133 +203,215 @@ await embed(
 }
 ```
 
-### `getSupportedProviders()`
+### `embed(config: Config, input: Input | Input[]): Promise<Result>`
 
-Returns available providers.
+Use a specific provider.
+
+**Config:**
 ```typescript
-import { getSupportedProviders } from 'embedbox';
-
-const providers = getSupportedProviders();
-// → ['openai', 'gemini', 'mistral', 'llamacpp']
-```
-
-### `createProvider(config)`
-
-Create provider instance for advanced usage.
-```typescript
-import { createProvider } from 'embedbox';
-
-const provider = createProvider({
-  provider: 'openai',
-  model: 'text-embedding-3-small',
-  apiKey: 'your-key'
-});
-
-const isReady = await provider.isReady();
-if (isReady) {
-  const result = await provider.embed({ text: 'Hello' });
+{
+  provider: 'llamacpp' | 'openai' | 'gemini' | 'mistral';
+  model?: string;          // Provider-specific model
+  apiKey?: string;         // Required for cloud providers
+  baseUrl?: string;        // Custom API endpoint
+  timeout?: number;        // Request timeout in ms
+  maxRetries?: number;     // Retry attempts
 }
 ```
 
-## Environment Variables
+**Input:**
+```typescript
+{ text: string } | { filePath: string } | Array<{text: string} | {filePath: string}>
+```
+
+**Returns:** Same as `autoEmbed`, but `embeddings: number[][]` for batch inputs.
+
+## Examples
+
+### Semantic Search
+```typescript
+import { autoEmbed } from 'vecbox';
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
+  const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+  const magB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+  return dotProduct / (magA * magB);
+}
+
+// Embed query and documents
+const query = await autoEmbed({ text: 'machine learning tutorials' });
+const docs = await Promise.all([
+  autoEmbed({ text: 'Introduction to neural networks' }),
+  autoEmbed({ text: 'Python web scraping guide' }),
+  autoEmbed({ text: 'Deep learning fundamentals' })
+]);
+
+// Calculate similarity scores
+const similarities = docs.map(doc => 
+  cosineSimilarity(query.embedding, doc.embedding)
+);
+
+// Find best match
+const bestIdx = similarities.indexOf(Math.max(...similarities));
+console.log(`Best match: Document ${bestIdx + 1} (score: ${similarities[bestIdx].toFixed(3)})`);
+```
+
+### Batch File Processing
+```typescript
+import { embed } from 'vecbox';
+import { readdir } from 'fs/promises';
+import { join } from 'path';
+
+async function embedDirectory(dirPath: string) {
+  const files = await readdir(dirPath);
+  const textFiles = files.filter(f => f.endsWith('.txt'));
+  
+  // Process all files in one batch
+  const result = await embed(
+    { provider: 'llamacpp' },
+    textFiles.map(file => ({ filePath: join(dirPath, file) }))
+  );
+  
+  return textFiles.map((file, i) => ({
+    filename: file,
+    embedding: result.embeddings[i]
+  }));
+}
+
+const results = await embedDirectory('./documents');
+console.log(`Embedded ${results.length} files`);
+```
+
+### Document Clustering
+```typescript
+import { autoEmbed } from 'vecbox';
+
+const documents = [
+  'The cat sat on the mat',
+  'Dogs are loyal pets',
+  'Python is a programming language',
+  'JavaScript runs in browsers',
+  'Birds can fly high'
+];
+
+// Get embeddings
+const embeddings = await Promise.all(
+  documents.map(doc => autoEmbed({ text: doc }))
+);
+
+// Simple clustering by similarity threshold
+function findClusters(embeddings: number[][], threshold = 0.7) {
+  const clusters: number[][] = [];
+  const assigned = new Set<number>();
+  
+  embeddings.forEach((emb, i) => {
+    if (assigned.has(i)) return;
+    
+    const cluster = [i];
+    assigned.add(i);
+    
+    embeddings.forEach((other, j) => {
+      if (i !== j && !assigned.has(j)) {
+        const sim = cosineSimilarity(emb, other);
+        if (sim > threshold) {
+          cluster.push(j);
+          assigned.add(j);
+        }
+      }
+    });
+    
+    clusters.push(cluster);
+  });
+  
+  return clusters;
+}
+
+const clusters = findClusters(embeddings.map(e => e.embedding));
+console.log('Clusters:', clusters);
+// Output: [[0, 1, 4], [2, 3]] - animals vs programming
+```
+
+## Troubleshooting
+
+### Native Module Issues
+
+**Error: `Cannot find module './build/Release/vecbox.node'`**
+
+The native module failed to compile. Rebuild it:
 ```bash
-# .env file
-OPENAI_API_KEY=sk-...
-GOOGLE_GENERATIVE_AI_API_KEY=...
-ANTHROPIC_API_KEY=sk-ant-...
-MISTRAL_API_KEY=...
+npm run build:native
+# or
+node-gyp rebuild
 ```
 
-## Error Handling
+**Error: `binding.createModel is not a function`**
 
+Your native module is outdated. Clean and rebuild:
+```bash
+rm -rf build/
+npm install
+```
+
+### Model Loading Issues
+
+**Error: `Model file not found`**
+
+Check that the model path is correct:
+```bash
+ls -la models/           # Verify model exists
+pwd                      # Check current directory
+```
+
+Use absolute paths if relative paths fail:
 ```typescript
-import { autoEmbed } from 'embedbox';
-
-try {
-  const result = await autoEmbed({ text: 'Hello' });
-  console.log(result.embedding);
-} catch (error) {
-  if (error.message.includes('API key')) {
-    console.error('Please set up your API keys in .env');
-  } else if (error.message.includes('not ready')) {
-    console.error('Provider is not available');
-  } else if (error.message.includes('network')) {
-    console.error('Network connection failed');
-  } else {
-    console.error('Embedding failed:', error.message);
-  }
-}
+const path = require('path');
+const modelPath = path.join(__dirname, 'models', 'model.gguf');
 ```
 
-## TypeScript Support
+### Performance
 
-Full TypeScript support with type definitions:
-```typescript
-import { 
-  autoEmbed, 
-  embed, 
-  getSupportedProviders, 
-  createProvider,
-  type EmbedConfig,
-  type EmbedInput,
-  type EmbedResult 
-} from 'embedbox';
+**Embeddings are slow:**
+- Use smaller quantized models (Q4_K_M is recommended)
+- Process texts in batches instead of one-by-one
+- Verify native module is loaded (check `result.provider === 'llamacpp'`)
 
-// Full type safety
-const config: EmbedConfig = {
-  provider: 'openai',
-  model: 'text-embedding-3-small'
-};
+**High memory usage:**
+- Models stay loaded in memory for performance
+- Use smaller models (bge-small instead of bge-large)
+- Process files in chunks for very large datasets
 
-const input: EmbedInput = {
-  text: 'Your text here'
-};
+## Features
 
-const result: EmbedResult = await embed(config, input);
-```
+- **🎯 Provider Agnostic** - One API for all embedding providers
+- **🤖 Smart Auto-Detection** - Automatically uses the best available option
+- **⚡ Native Performance** - C++ via N-API for maximum speed
+- **🔄 Automatic Fallbacks** - Seamlessly switches providers if one fails
+- **📁 File Support** - Read and embed text files directly
+- **📦 Batch Processing** - Efficient multi-document embedding
+- **🛡️ TypeScript First** - Full type safety and IDE autocomplete
+- **🌍 Zero Setup** - Native module compiles automatically on install
+- **🔒 Privacy-First** - Local processing keeps your data private
 
-## 📚 Documentation
-
-- **[API Reference](./API.md)** - Complete API documentation
-- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to Vecbox
-- **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Examples](./examples/)** - Code examples and tutorials
-
-## 🤝 Contributing
-
-We welcome contributions! See our [Contributing Guide](./CONTRIBUTING.md) for:
-- Adding new providers
-- Improving performance
-- Bug fixes and features
-- Documentation improvements
-
-## 🐛 Troubleshooting
-
-Having issues? Check our [Troubleshooting Guide](./TROUBLESHOOTING.md) for:
-- Installation problems
-- Runtime errors
-- Performance issues
-- Common solutions
-
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Credits
 
-- [Llama.cpp](https://github.com/ggml-org/llama.cpp) - Core embedding engine
-- [OpenAI](https://openai.com/) - Embedding API
-- [Google Gemini](https://ai.google.dev/) - Embedding API
-- [Mistral AI](https://mistral.ai/) - Embedding API
+Built on top of excellent open-source projects:
 
-## 📞 Support
+- [llama.cpp](https://github.com/ggml-org/llama.cpp) - High-performance LLM inference
+- [OpenAI](https://openai.com/) - text-embedding-3 models
+- [Google Gemini](https://ai.google.dev/) - gemini-embedding models
+- [Mistral AI](https://mistral.ai/) - mistral-embed model
 
-- **GitHub Issues**: [Report bugs](https://github.com/box-safe/vecbox/issues)
-- **GitHub Discussions**: [Ask questions](https://github.com/box-safe/vecbox/discussions)
-- **Documentation**: [API Reference](./API.md)
+## Contributing
+
+Issues and pull requests welcome at [github.com/box-safe/vecbox](https://github.com/box-safe/vecbox)
 
 ---
 
-**⭐ Star us on GitHub!** [github.com/box-safe/vecbox](https://github.com/box-safe/vecbox)
+**⭐ If Vecbox saves you time, star us on GitHub!**
 
-**Made with ❤️ by the Vecbox Team**
+**Made with ❤️ for developers who value simplicity and performance**
