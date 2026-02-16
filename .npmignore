@@ -27,7 +27,6 @@ coverage
 .nyc_output
 
 # Dependencies
-native/node_modules/
 node_modules/
 jspm_packages/
 web_modules/

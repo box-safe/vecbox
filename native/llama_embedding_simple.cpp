@@ -56,7 +56,7 @@ Napi::Value GetEmbedding(const Napi::CallbackInfo& info) {
         throw throwNapiError(env, "text must be a string");
     }
     
-    ModelData* modelData = info[0].As<Napi::External<ModelData>>().Data();
+    ModelData* modelData = info[0].As<Napi::External<ModelData>>().Data(); // get pointer, passed through js
     std::string text = info[1].As<Napi::String>().Utf8Value();
     
     // Generate mock embedding based on text hash
@@ -109,3 +109,4 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 }
 
 NODE_API_MODULE(llama_embedding, Init)
+

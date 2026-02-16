@@ -78,9 +78,6 @@ pnpm-lock.yaml
 
 # Development files
 tests/
-docs/
-TODO.md
-PUBLISH.md
 l.md
 modules.d.ts
 vitest.config.ts
@@ -111,5 +108,6 @@ CMD.md
 .npmrc
 
 # Native build files (keep source, remove build)
-native/build/
+native/build/nomic-embed-text-v1.5.Q4_K_M.gguf
 native/node_modules/
+

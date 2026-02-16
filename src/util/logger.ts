@@ -1,8 +1,8 @@
 export enum LogLevel {
-    DEBUG = 0,
-    INFO = 1,
-    WARN = 2,
-    ERROR = 3,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
 }
 
 export interface LogEntry {
@@ -13,6 +13,7 @@ export interface LogEntry {
 }
 
 export class Logger {
+    public contLogger: number;
     private static instance: Logger;
     private currentLevel: LogLevel;
     private moduleName: string;
@@ -35,6 +36,7 @@ export class Logger {
 
     constructor(moduleName: string = 'embedbox', level?: LogLevel) {
         this.moduleName = moduleName;
+        this.contLogger = 0;
         // Check for DEBUG environment variable
         if (level === undefined) {
             this.currentLevel = process.env.DEBUG === 'true' ? LogLevel.DEBUG : LogLevel.INFO;
@@ -62,32 +64,39 @@ export class Logger {
         const levelName = Logger.LEVEL_NAMES[level];
         const color = Logger.COLORS[levelName as keyof typeof Logger.COLORS];
         const reset = Logger.COLORS.RESET;
-
-        return `${color}[${levelName}(${this.moduleName})]${reset} ${message}\n\n`;
+        if (this.contLogger === 0 ) {
+            return `\n\n${color}[${levelName}(${this.moduleName})]${reset} ${message}`;    
+        }
+        return `\n${color}[${levelName}(${this.moduleName})]${reset} ${message}`;   
+        
     }
 
     private log(level: LogLevel, message: string): void {
         if (level < this.currentLevel) {
             return;
         }
-
+        
         const formattedMessage = this.formatMessage(level, message);
         process.stdout.write(formattedMessage);
     }
 
     debug(message: string): void {
+        this.contLogger++;
         this.log(LogLevel.DEBUG, message);
     }
 
     info(message: string): void {
+        this.contLogger++;
         this.log(LogLevel.INFO, message);
     }
 
     warn(message: string): void {
+        this.contLogger++;
         this.log(LogLevel.WARN, message);
     }
 
     error(message: string): void {
+        this.contLogger++;
         this.log(LogLevel.ERROR, message);
     }
 

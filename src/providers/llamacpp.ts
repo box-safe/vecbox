@@ -1,9 +1,8 @@
-import { access, constants, readFile as fsReadFile } from 'fs/promises';
-import { join, resolve, dirname } from 'path';
+import { access, constants} from 'fs/promises';
+import { join, resolve } from 'path';
 import { EmbeddingProvider } from '@providers/base/EmbeddingProvider';
 import type { EmbedConfig, EmbedInput, EmbedResult, BatchEmbedResult } from '@src/types/index';
 import { logger } from '@src/util/logger';
-import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -92,12 +91,26 @@ export class LlamaCppProvider extends EmbeddingProvider {
   getDimensions(): number {
     // Known dimensions for common models
     const model = this.getModel();
-    if (model.includes('nomic-embed-text-v1.5')) return 768;
-    if (model.includes('nomic-embed-text-v1')) return 768;
-    if (model.includes('all-MiniLM-L6-v2')) return 384;
-    if (model.includes('bge-base')) return 768;
-    if (model.includes('bert-base')) return 768;
-    return 768; // default
+    switch(true) {
+      case model.includes('nomic-embed-text-v1.5'):
+        return 768;
+      case model.includes('nomic-embed-text-v1'):
+        return 768;
+      case model.includes('all-MiniLM-L6-v2'):
+        return 384;
+      case model.includes('bge-base'):
+        return 768;
+      case model.includes('bert-base'):
+        return 768;
+      default:
+        return 768;
+    }
+    // if (model.includes('nomic-embed-text-v1.5')) return 768;
+    // if (model.includes('nomic-embed-text-v1')) return 768;
+    // if (model.includes('all-MiniLM-L6-v2')) return 384;
+    // if (model.includes('bge-base')) return 768;
+    // if (model.includes('bert-base')) return 768;
+    // return 768; // default
   }
 
   async isReady(): Promise<boolean> {
